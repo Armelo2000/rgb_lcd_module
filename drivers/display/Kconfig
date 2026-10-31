@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config DISPLAY_WAVESHARE_ESP32S3_RGB
+	bool "Waveshare ESP32-S3 LCD_CAM RGB/DPI display driver (experimental, out-of-tree)"
+	default y
+	depends on DT_HAS_WAVESHARE_ESP32S3_LCD_CAM_RGB_ENABLED
+	select DISPLAY
+	help
+	  Experimental out-of-tree driver that programs the ESP32-S3 LCD_CAM
+	  peripheral in parallel RGB/DPI timing-generator mode plus a
+	  dedicated GDMA channel driven directly at the HAL level (bypassing
+	  Zephyr's generic espressif,esp32-gdma driver, which does not support
+	  cyclic/circular descriptor lists needed for continuous frame
+	  streaming). Unblank resets the LCD and DMA and primes the FIFO
+	  before starting pixel output. Applications can blank the display
+	  while drawing their initial frame to avoid concurrent PSRAM
+	  rendering and scanout during startup. Hardware validation is
+	  still required. The pixel clock uses the Espressif HAL divider
+	  calculation, including its prescaler workaround for LCD clock
+	  instability when the pixel-clock prescaler is bypassed.
+	  Two internal-SRAM bounce buffers isolate GDMA from PSRAM bus
+	  contention. An IRAM-resident VSYNC handler recovers missed buffer
+	  deadlines, compensating for the ESP32-S3 LCD FIFO's retained pixels.
+	  PSRAM/cache must remain accessible while scanout is active; blank
+	  the display before operations that disable external-memory access.

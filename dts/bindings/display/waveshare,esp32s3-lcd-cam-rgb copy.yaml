@@ -1,0 +1,139 @@
+description: |
+  EXPERIMENTAL, out-of-tree binding for the ESP32-S3 LCD_CAM peripheral
+  operated in parallel RGB/DPI timing-generator mode (hsync/vsync/de/pclk +
+  N-bit parallel data bus), as used by panels such as the Waveshare
+  ESP32-S3-Touch-LCD-7.
+
+  This is NOT an upstream Zephyr binding. Zephyr mainline only supports
+  LCD_CAM in I8080/DBI mode (espressif,esp32-lcd-cam-mipi-dbi) and, on
+  ESP32-P4, MIPI-DSI. This binding models the RGB timing-generator submode
+  that upstream does not yet cover, and is meant to be added as a child of
+  the SoC-provided `espressif,esp32-lcd-cam` node (the same parent used by
+  `espressif,esp32-lcd-cam-mipi-dbi` / `espressif,esp32-lcd-cam-dvp`), so it
+  inherits that node's reg/interrupts/clocks/pinctrl properties.
+
+  Example (board overlay):
+
+    &lcd_cam {
+        status = "okay";
+        pinctrl-0 = <&lcd_cam_default>;
+        pinctrl-names = "default";
+
+        rgb_disp: rgb-display {
+            compatible = "waveshare,esp32s3-lcd-cam-rgb";
+            status = "okay";
+            dmas = <&gdma0 0>;
+            dma-names = "tx";
+            width = <800>;
+            height = <480>;
+            pixel-clk-hz = <16000000>;
+            hsync-len = <4>;
+            hback-porch = <8>;
+            hfront-porch = <8>;
+            vsync-len = <4>;
+            vback-porch = <8>;
+            vfront-porch = <8>;
+            data-width = <16>;
+            pclk-active-neg;
+        };
+    };
+
+compatible: "waveshare,esp32s3-lcd-cam-rgb_dummy"
+
+include: [display-controller.yaml]
+
+properties:
+  dmas:
+    required: true
+    description: |
+      Phandle to the GDMA controller. NOTE - this driver claims and drives
+      the referenced channel directly at the gdma_hal_*() level (a circular,
+      never-NULL-terminated descriptor list), it does NOT go through
+      Zephyr's dma_start()/dma_config() API, because the generic
+      espressif,esp32-gdma driver always NULL-terminates its descriptor
+      chain and has no cyclic mode. The phandle is only used to identify
+      which GDMA instance/channel number to claim exclusively.
+
+  dma-names:
+    required: true
+
+  width:
+    type: int
+    required: true
+    description: Panel horizontal resolution in pixels.
+
+  height:
+    type: int
+    required: true
+    description: Panel vertical resolution in pixels.
+
+  pixel-clk-hz:
+    type: int
+    required: true
+    description: LCD_CAM PCLK frequency in Hz.
+
+  hsync-len:
+    type: int
+    required: true
+
+  hback-porch:
+    type: int
+    required: true
+
+  hfront-porch:
+    type: int
+    required: true
+
+  vsync-len:
+    type: int
+    required: true
+
+  vback-porch:
+    type: int
+    required: true
+
+  vfront-porch:
+    type: int
+    required: true
+
+  data-width:
+    type: int
+    default: 16
+    description: Parallel RGB data bus width (8 or 16).
+
+  hsync-idle-low:
+    type: boolean
+    description: HSYNC signal idles low (active high) if set.
+
+  vsync-idle-low:
+    type: boolean
+    description: VSYNC signal idles low (active high) if set.
+
+  de-idle-high:
+    type: boolean
+    description: DE (data enable) signal idles high if set.
+
+  pclk-active-neg:
+    type: boolean
+    description: Sample/shift data on the falling edge of PCLK if set.
+
+  # ESP32-S3 routes LCD_CAM RGB signals through the GPIO matrix rather than
+  # static IOMUX pinctrl, so (unlike most Zephyr display drivers) the pin
+  # assignment is expressed here as plain GPIO phandle-arrays instead of a
+  # pinctrl-0 group, mirroring ESP-IDF's esp_lcd_rgb_panel_config_t.
+  hsync-gpios:
+    type: phandle-array
+    required: true
+  vsync-gpios:
+    type: phandle-array
+    required: true
+  de-gpios:
+    type: phandle-array
+    required: true
+  pclk-gpios:
+    type: phandle-array
+    required: true
+  data-gpios:
+    type: phandle-array
+    required: true
+    description: 8 or 16 entries (matches data-width), data0 first.

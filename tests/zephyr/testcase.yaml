@@ -1,0 +1,7 @@
+tests:
+  rgb_lcd_module.build:
+    build_only: true
+    platform_allow:
+      - esp32s3_devkitc/esp32s3/procpu
+    tags:
+      - display

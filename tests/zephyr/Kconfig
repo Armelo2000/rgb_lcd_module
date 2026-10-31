@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
+mainmenu "RGB LCD module build check"
+
+source "Kconfig.zephyr"

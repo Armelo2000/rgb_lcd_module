@@ -1,0 +1,6 @@
+name: rgb_lcd_module
+build:
+  cmake: .
+  kconfig: Kconfig
+  settings:
+    dts_root: .

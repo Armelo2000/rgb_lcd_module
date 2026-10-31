@@ -1,0 +1,35 @@
+/* Compile/link fixture only, not a panel wiring configuration. */
+#include <zephyr/dt-bindings/pinctrl/esp32s3-pinctrl.h>
+
+&pinctrl {
+	rgb_compile_default: rgb_compile_default {
+		group1 {
+			pinmux = <LCD_CAM_LCD_CLK_GPIO1>;
+		};
+	};
+};
+
+&lcd_cam {
+	rgb_compile_display: rgb-display {
+		compatible = "waveshare,esp32s3-lcd-cam-rgb";
+		status = "okay";
+		zephyr,deferred-init;
+		pinctrl-0 = <&rgb_compile_default>;
+		pinctrl-names = "default";
+		clocks = <&clock ESP32_LCD_CAM_MODULE>;
+		interrupt-parent = <&intc>;
+		interrupts = <LCD_CAM_INTR_SOURCE IRQ_DEFAULT_PRIORITY 0>;
+		dmas = <&dma 7>;
+		dma-names = "tx";
+		width = <16>;
+		height = <16>;
+		pixel-clk-hz = <16000000>;
+		hsync-len = <4>;
+		hback-porch = <8>;
+		hfront-porch = <8>;
+		vsync-len = <4>;
+		vback-porch = <8>;
+		vfront-porch = <8>;
+		data-width = <16>;
+	};
+};

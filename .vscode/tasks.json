@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CMake: Configure Zephyr RGB LCD build",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-S",
+                "${workspaceFolder}",
+                "-B",
+                "${workspaceFolder}/build/zephyr",
+                "-G",
+                "Ninja",
+                "-DBOARD=esp32s3_devkitc/esp32s3/procpu",
+                "-DCONF_FILE=${workspaceFolder}/tests/zephyr/prj.conf",
+                "-DKCONFIG_ROOT=${workspaceFolder}/tests/zephyr/Kconfig",
+                "-DDTC_OVERLAY_FILE=${workspaceFolder}/tests/zephyr/app.overlay",
+                "-DZEPHYR_BASE=${workspaceFolder}/../../zephyr",
+                "-DZephyr_DIR=${workspaceFolder}/../../zephyr/share/zephyr-package/cmake",
+                "-DPython3_EXECUTABLE=${workspaceFolder}/../../.venv/bin/python"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "CMake: Build Zephyr RGB LCD module",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build/zephyr"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "CMake: Configure Zephyr RGB LCD build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$gcc"
+        }
+    ]
+}
